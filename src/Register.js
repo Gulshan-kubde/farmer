@@ -62,6 +62,7 @@ const Register = () => {
       });
 
       if (response.ok) {
+        console.log("register called");
         setAlertMessage('Registered successfully!');
         setShowAlert(true);
         setTimeout(() => {
