@@ -49,14 +49,24 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		/*
+		 * http.csrf(csrf -> csrf.disable()).authorizeHttpRequests( auth ->
+		 * auth.requestMatchers("/auth/**",
+		 * "/**").permitAll().anyRequest().authenticated()) .oauth2ResourceServer(oauth2
+		 * -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter)))
+		 * .sessionManagement(session ->
+		 * session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+		 * 
+		 * return http.build();
+		 */
+		http.csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/auth/**", "/**").permitAll()
+            .anyRequest().permitAll())
+        .sessionManagement(session -> session
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-		http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(
-				auth -> auth.requestMatchers("/auth/**", "/swagger-ui/**").permitAll() .requestMatchers("/**").hasRole("CLIENT_ADMIN").anyRequest().authenticated())
-				.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter)))
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-		return http.build();
-
+    return http.build();
 	}
 
 	@Bean

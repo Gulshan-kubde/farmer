@@ -29,6 +29,7 @@ import cropulse.io.dto.LoginDTO;
 import cropulse.io.dto.UserDTO;
 import cropulse.io.utility.KeycloakUtitlity;
 
+
 @RestController
 @RequestMapping("/auth/api")
 public class AuthController {
@@ -84,7 +85,7 @@ public class AuthController {
 		AccessTokenResponse tokenResponse = keycloakInstance.tokenManager().grantToken();
 
 		return ResponseEntity.ok(tokenResponse);
-		
+
 	}
 
 	@PutMapping("/update/{userId}")
