@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import axios from 'axios';
 
 const FarmLandPlanning = () => {
@@ -13,7 +13,7 @@ const FarmLandPlanning = () => {
 
   useEffect(() => {
     // Fetch farms from backend
-    axios.get('http://localhost:8080/farmlands')
+    axios.get('http://localhost:8081/api/farmlands')
       .then(response => {
         setFarms(response.data);
       })
@@ -26,45 +26,68 @@ const FarmLandPlanning = () => {
     setShowForm(!showForm);
   };
 
-  const addFarm = () => {
+  const addOrEditFarm = () => {
     if (approxAcre && cents && name) {
       const newFarm = { approxAcre, cents, name };
-
-      axios.post('http://localhost:8080/farmlands', newFarm)
-        .then(response => {
-          const savedFarm = response.data;
-
-          if (isEditing) {
+  
+      if (isEditing) {
+        // Update existing farm
+        axios.put(`http://localhost:8081/api/farmlands/${farms[editIndex].farmerId}`, newFarm)
+          .then(response => {
+            const updatedFarm = response.data;
             const updatedFarms = [...farms];
-            updatedFarms[editIndex] = savedFarm;
+            updatedFarms[editIndex] = { ...updatedFarm, farmerId: farms[editIndex].farmerId }; // Retain the farmerId
             setFarms(updatedFarms);
-            setIsEditing(false);
-            setEditIndex(null);
-          } else {
-            setFarms([...farms, savedFarm]);
-          }
-
-          setAcre('');
-          setCents('');
-          setFarmName('');
-          setShowForm(false); // Hide the form after adding
-        })
-        .catch(error => {
-          console.error('Error adding farm:', error);
-        });
+            resetForm();
+          })
+          .catch(error => {
+            console.error('Error editing farm:', error);
+          });
+      } else {
+        // Add new farm
+        axios.post('http://localhost:8081/api/farmlands', newFarm)
+          .then(response => {
+            const savedFarm = response.data;
+            setFarms([...farms, savedFarm]); // Add new farm to the state
+            resetForm();
+          })
+          .catch(error => {
+            console.error('Error adding farm:', error);
+          });
+      }
     }
   };
+  
+  const resetForm = () => {
+    setAcre('');
+    setCents('');
+    setFarmName('');
+    setShowForm(false);
+    setIsEditing(false);
+    setEditIndex(null);
+  };
+  
+
   const deleteFarm = (index) => {
     const farmToDelete = farms[index];
-    console.log("farm id :"+farmToDelete);
-    axios.delete(`http://localhost:8080/farmlands/${farmToDelete.id}`, farmToDelete) // Full URL
-        .then(() => {
-            setFarms(farms.filter((_, i) => i !== index));
-        })
-        .catch(error => {
-            console.error('Error deleting farm:', error);
-        });
-};
+    axios.delete(`http://localhost:8081/api/farmlands/${farmToDelete.farmerId}`)
+      .then(() => {
+        setFarms(farms.filter((_, i) => i !== index));
+      })
+      .catch(error => {
+        console.error('Error deleting farm:', error);
+      });
+  };
+
+  const editFarm = (index) => {
+    const farmToEdit = farms[index];
+    setAcre(farmToEdit.approxAcre);
+    setCents(farmToEdit.cents);
+    setFarmName(farmToEdit.name);
+    setIsEditing(true);
+    setEditIndex(index);
+    setShowForm(true); // Show form with pre-filled values for editing
+  };
 
   return (
     <div style={styles.container}>
@@ -114,7 +137,7 @@ const FarmLandPlanning = () => {
             <button
               onClick={(e) => {
                 e.preventDefault();
-                addFarm();
+                addOrEditFarm();
               }}
               style={styles.addButton}
             >
@@ -128,15 +151,24 @@ const FarmLandPlanning = () => {
       {farms.length > 0 && (
         <div style={styles.cardContainer}>
           {farms.map((farm, index) => (
-            <div key={farm.id} style={styles.card}>
+            <div key={farm.farmerId} style={styles.card}>
               <p><strong>Name:</strong> {farm.name}</p>
-              <p><strong>Area:</strong> {farm.approxAcre}</p>
-              <button
-                onClick={() => deleteFarm(index)}
-                style={styles.deleteButton}
-              >
-                Delete
-              </button>
+              <p><strong>Approx Acre:</strong> {farm.approxAcre}</p>
+              <p><strong>Cents:</strong> {farm.cents}</p>
+              <div style={styles.buttonGroup}>
+                <button
+                  onClick={() => editFarm(index)}
+                  style={styles.editButton}
+                >
+                  Edit <FaEdit />
+                </button>
+                <button
+                  onClick={() => deleteFarm(index)}
+                  style={styles.deleteButton}
+                >
+                  Delete <FaTrash />
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -220,7 +252,15 @@ const styles = {
     padding: '5px 10px',
     borderRadius: '4px',
     cursor: 'pointer',
-    marginTop: '10px',
+  },
+  editButton: {
+    backgroundColor: '#ffc107',
+    color: '#fff',
+    border: 'none',
+    padding: '5px 10px',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    marginRight: '10px',
   },
 };
 
