@@ -1,7 +1,11 @@
 package cropulse.io.dto;
 
+import java.util.Date;
+
 import org.springframework.data.annotation.Id;
 
+import lombok.Data;
+@Data
 public class SeedDTO {
 
 	@Id
@@ -9,19 +13,4 @@ public class SeedDTO {
     private String seedName;
 
   
-    public String getSeedId() {
-        return seedId;
-    }
-
-    public void setSeedId(String seedId) {
-        this.seedId = seedId;
-    }
-
-    public String getSeedName() {
-        return seedName;
-    }
-
-    public void setSeedName(String seedName) {
-        this.seedName = seedName;
-    }
 }

@@ -84,6 +84,7 @@ public class AuthController {
 		AccessTokenResponse tokenResponse = keycloakInstance.tokenManager().grantToken();
 
 		return ResponseEntity.ok(tokenResponse);
+		
 	}
 
 	@PutMapping("/update/{userId}")

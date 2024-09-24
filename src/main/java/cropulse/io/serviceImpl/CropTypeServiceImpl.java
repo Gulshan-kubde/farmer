@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,8 @@ import cropulse.io.service.CropTypeService;
 @Service
 public class CropTypeServiceImpl implements CropTypeService {
 
+    private static final Logger logger = LoggerFactory.getLogger(CropTypeServiceImpl.class);
+
     @Autowired
     private CropTypeRepository cropTypeRepository;
     
@@ -23,29 +27,46 @@ public class CropTypeServiceImpl implements CropTypeService {
 
     @Override
     public String addCropType(CropTypeDTO cropTypeDTO) {
+        logger.info("Entering method: addCropType with data: {}", cropTypeDTO);
         validateCropType(cropTypeDTO);
         CropType cropType = modelMapper.map(cropTypeDTO, CropType.class);
         
-        
         cropTypeRepository.save(cropType);
+        logger.info("Exiting method: addCropType. CropType created successfully.");
         return "CropType created successfully.";
     }
-    @Override
-    public List<CropType> getAllCropTypes() {
-        return cropTypeRepository.findAll();
-    }
-
     
     @Override
+    public List<CropType> getAllCropTypes() {
+        logger.info("Entering method: getAllCropTypes");
+        List<CropType> cropTypes = cropTypeRepository.findAll();
+        logger.info("Exiting method: getAllCropTypes with result size: {}", cropTypes.size());
+        return cropTypes;
+    }
+
+    @Override
     public Optional<CropType> getCropTypeById(String cropTypeId) {
-        return cropTypeRepository.findById(cropTypeId);
+        logger.info("Entering method: getCropTypeById with ID: {}", cropTypeId);
+        Optional<CropType> cropType = cropTypeRepository.findById(cropTypeId);
+        
+        if (cropType.isPresent()) {
+            logger.info("CropType found with ID: {}", cropTypeId);
+        } else {
+            logger.warn("No CropType found with ID: {}", cropTypeId);
+        }
+        
+        logger.info("Exiting method: getCropTypeById");
+        return cropType;
     }
 
     @Override
     public String updateCropType(String cropTypeId, CropTypeDTO cropTypeDTO) {
+        logger.info("Entering method: updateCropType with ID: {} and data: {}", cropTypeId, cropTypeDTO);
+        
         Optional<CropType> existingCropType = cropTypeRepository.findById(cropTypeId);
 
         if (!existingCropType.isPresent()) {
+            logger.error("CropType with ID {} does not exist", cropTypeId);
             throw new IllegalArgumentException("CropType with ID " + cropTypeId + " does not exist.");
         }
 
@@ -54,25 +75,34 @@ public class CropTypeServiceImpl implements CropTypeService {
         
         cropType.setCropTypeId(cropTypeId);
         cropTypeRepository.save(cropType);
-
+        
+        logger.info("Exiting method: updateCropType. CropType updated successfully with ID: {}", cropTypeId);
         return "CropType updated successfully.";
     }
+
     @Override
     public String deleteCropType(String cropTypeId) {
+        logger.info("Entering method: deleteCropType with ID: {}", cropTypeId);
+        
         Optional<CropType> existingCropType = cropTypeRepository.findById(cropTypeId);
 
         if (!existingCropType.isPresent()) {
+            logger.error("CropType with ID {} does not exist", cropTypeId);
             throw new IllegalArgumentException("CropType with ID " + cropTypeId + " does not exist.");
         }
 
         cropTypeRepository.deleteById(cropTypeId);
+        logger.info("Exiting method: deleteCropType. CropType with ID {} deleted successfully", cropTypeId);
         return "CropType with ID " + cropTypeId + " deleted successfully.";
     }
 
     private void validateCropType(CropTypeDTO cropType) {
+        logger.debug("Validating CropType: {}", cropType);
         String cropName = cropType.getCropName();
         if (cropName == null || cropName.trim().isEmpty()) {
+            logger.error("Validation error: CropName cannot be null or empty.");
             throw new IllegalArgumentException("CropName cannot be null or empty.");
         }
+        logger.debug("Validation completed successfully for CropType: {}", cropType);
     }
 }
