@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // Import axios for making API calls
+import axios from 'axios';
 import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 
 const CropPlanning = () => {
   const [cropPlans, setCropPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
+
   const [plot, setPlot] = useState('');
   const [cropType, setCropType] = useState('');
   const [sowingDate, setSowingDate] = useState('');
@@ -13,11 +14,16 @@ const CropPlanning = () => {
   const [expectedRevenue, setExpectedRevenue] = useState('');
   const [cultivation, setCultivation] = useState('');
 
-   // Fetch crop plans from the backend
-   useEffect(() => {
+  const [plots, setPlots] = useState([]);
+  const [cropTypes, setCropTypes] = useState([]);
+  const [seeds, setSeeds] = useState([]);
+  const [cultivations, setCultivations] = useState([]);
+
+  // Fetch crop plans from the backend API
+  useEffect(() => {
     const fetchCropPlans = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/crop-planning'); // Fetch from backend
+        const response = await axios.get('http://localhost:8081/api/crop_planning');
         setCropPlans(response.data);
       } catch (error) {
         console.error('Error fetching crop plans:', error);
@@ -26,20 +32,87 @@ const CropPlanning = () => {
     fetchCropPlans();
   }, []);
 
+  // Fetch plots
+  useEffect(() => {
+    const fetchPlots = async () => {
+      try {
+        const response = await axios.get('http://localhost:8081/api/plots');
+        setPlots(response.data);
+      } catch (error) {
+        console.error('Error fetching plots:', error);
+      }
+    };
+    fetchPlots();
+  }, []);
+
+  // Fetch crop types
+  useEffect(() => {
+    const fetchCropTypes = async () => {
+      try {
+        const response = await axios.get('http://localhost:8081/api/cropTypes');
+        setCropTypes(response.data);
+      } catch (error) {
+        console.error('Error fetching crop types:', error);
+      }
+    };
+    fetchCropTypes();
+  }, []);
+
+  // Fetch seeds
+  useEffect(() => {
+    const fetchSeeds = async () => {
+      try {
+        const response = await axios.get('http://localhost:8081/api/seeds');
+        setSeeds(response.data);
+      } catch (error) {
+        console.error('Error fetching seeds:', error);
+      }
+    };
+    fetchSeeds();
+  }, []);
+
+  // Fetch cultivation methods
+  useEffect(() => {
+    const fetchCultivations = async () => {
+      try {
+        const response = await axios.get('http://localhost:8081/api/cultivations');
+        setCultivations(response.data);
+      } catch (error) {
+        console.error('Error fetching cultivations:', error);
+      }
+    };
+    fetchCultivations();
+  }, []);
+
+  // Function to handle adding or updating crop plans
   const handleAddOrUpdatePlan = async () => {
-    const cropPlanning = { plot, cropType, sowingDate, yield: expectedYield, seedsUsed, revenue: expectedRevenue, cultivation };
+    const cropPlanning = {
+      plot: plot.plotName,             // Send plot name
+      cropType: cropType.cropName,     // Send crop type name
+      sowingDate,
+      yield: expectedYield,
+      seedsUsed: seedsUsed.seedName,   // Send seeds used name
+      revenue: expectedRevenue,
+      cultivation: cultivation.cultivationName, // Send cultivation name
+    };
+
     if (selectedPlan !== null) {
-      // Update existing plan
-      const updatedPlans = cropPlans.map((plan, index) =>
-        index === selectedPlan ? cropPlanning : plan
-      );
-      setCropPlans(updatedPlans);
-      setSelectedPlan(null);
+      // Update existing plan logic
+      try {
+        await axios.put(`http://localhost:8081/api/crop_planning/${selectedPlan.id}`, cropPlanning);
+        const updatedPlans = cropPlans.map((plan) =>
+          plan.id === selectedPlan.id ? { ...plan, ...cropPlanning } : plan
+        );
+        setCropPlans(updatedPlans);
+        setSelectedPlan(null);
+      } catch (error) {
+        console.error('Error updating crop plan:', error);
+      }
     } else {
       // Add new plan
       try {
-        const response = await axios.post('http://localhost:8080/crop-planning', cropPlanning); // Send to backend
-        setCropPlans([...cropPlans, response.data]); // Update state with new plan
+        const response = await axios.post('http://localhost:8081/api/crop_planning', cropPlanning);
+        setCropPlans([...cropPlans, response.data]);
       } catch (error) {
         console.error('Error adding crop plan:', error);
       }
@@ -47,23 +120,30 @@ const CropPlanning = () => {
     clearForm();
   };
 
-  const handleEdit = (index) => {
-    const plan = cropPlans[index];
-    setSelectedPlan(index);
+  // Edit plan functionality
+  const handleEdit = (plan) => {
+    setSelectedPlan(plan);
     setPlot(plan.plot);
     setCropType(plan.cropType);
     setSowingDate(plan.sowingDate);
-    setExpectedYield(plan.expectedYield);
+    setExpectedYield(plan.yield);
     setSeedsUsed(plan.seedsUsed);
-    setExpectedRevenue(plan.expectedRevenue);
+    setExpectedRevenue(plan.revenue);
     setCultivation(plan.cultivation);
   };
 
-  const handleDelete = (index) => {
-    const updatedPlans = cropPlans.filter((_, i) => i !== index);
-    setCropPlans(updatedPlans);
+  // Delete plan functionality
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:8081/api/crop_planning/${id}`);
+      const updatedPlans = cropPlans.filter((plan) => plan.id !== id);
+      setCropPlans(updatedPlans);
+    } catch (error) {
+      console.error('Error deleting crop plan:', error);
+    }
   };
 
+  // Clear form fields
   const clearForm = () => {
     setPlot('');
     setCropType('');
@@ -72,27 +152,31 @@ const CropPlanning = () => {
     setSeedsUsed('');
     setExpectedRevenue('');
     setCultivation('');
+    setSelectedPlan(null);
   };
 
   return (
     <div style={styles.container}>
       <h2 style={styles.header}>Crop Planning</h2>
-      
+
       <div style={styles.formContainer}>
-        {/* Left side: Form */}
         <div style={styles.form}>
-          <select style={styles.input} value={plot} onChange={(e) => setPlot(e.target.value)}>
+          <select style={styles.input} value={plot} onChange={(e) => setPlot(JSON.parse(e.target.value))}>
             <option value="">Select Plot</option>
-            {/* Add more plot options as required */}
-            <option value="Plot 1">Plot 1</option>
-            <option value="Plot 2">Plot 2</option>
+            {plots.map((plot) => (
+              <option key={plot.plotId} value={JSON.stringify(plot)}>
+                {plot.plotName}
+              </option>
+            ))}
           </select>
 
-          <select style={styles.input} value={cropType} onChange={(e) => setCropType(e.target.value)}>
+          <select style={styles.input} value={cropType} onChange={(e) => setCropType(JSON.parse(e.target.value))}>
             <option value="">Select Crop Type</option>
-            {/* Add more crop options as required */}
-            <option value="Wheat">Wheat</option>
-            <option value="Rice">Rice</option>
+            {cropTypes.map((crop) => (
+              <option key={crop.cropTypeId} value={JSON.stringify(crop)}>
+                {crop.cropName}
+              </option>
+            ))}
           </select>
 
           <input
@@ -111,11 +195,13 @@ const CropPlanning = () => {
             onChange={(e) => setExpectedYield(e.target.value)}
           />
 
-          <select style={styles.input} value={seedsUsed} onChange={(e) => setSeedsUsed(e.target.value)}>
+          <select style={styles.input} value={seedsUsed} onChange={(e) => setSeedsUsed(JSON.parse(e.target.value))}>
             <option value="">Select Seeds</option>
-            {/* Add more seed options as required */}
-            <option value="Seed 1">Seed 1</option>
-            <option value="Seed 2">Seed 2</option>
+            {seeds.map((seed) => (
+              <option key={seed.seedId} value={JSON.stringify(seed)}>
+                {seed.seedName}
+              </option>
+            ))}
           </select>
 
           <input
@@ -126,29 +212,40 @@ const CropPlanning = () => {
             onChange={(e) => setExpectedRevenue(e.target.value)}
           />
 
-          <select style={styles.input} value={cultivation} onChange={(e) => setCultivation(e.target.value)}>
+          <select style={styles.input} value={cultivation} onChange={(e) => setCultivation(JSON.parse(e.target.value))}>
             <option value="">Select Cultivation</option>
-            {/* Add more cultivation options as required */}
-            <option value="Organic">Organic</option>
-            <option value="Inorganic">Inorganic</option>
+            {cultivations.map((cult) => (
+              <option key={cult.cultivationId} value={JSON.stringify(cult)}>
+                {cult.cultivationName}
+              </option>
+            ))}
           </select>
 
           <button onClick={handleAddOrUpdatePlan} style={styles.addButton}>
-            {selectedPlan !== null ? 'Update' : 'Add Plan'} <FaPlus />
+            {selectedPlan ? 'Update Plan' : 'Add Plan'} <FaPlus />
           </button>
         </div>
 
-        {/* Right side: List of crop plans */}
         <div style={styles.planList}>
           <h3>Existing Crop Plans</h3>
-          {cropPlans.map((plan, index) => (
-            <div key={index} style={styles.planItem}>
+          {cropPlans.map((plan) => (
+            <div key={plan.id} style={styles.planItem}>
               <div>
-                <p><strong>Plan {index + 1}:</strong> {plan.plot}</p>
+                <p><strong>Plot:</strong> {plan.plot}</p>
+                <p><strong>Crop Type:</strong> {plan.cropType}</p>
+                <p><strong>Sowing Date:</strong> {new Date(plan.sowingDate).toLocaleDateString()}</p>
+                <p><strong>Yield:</strong> {plan.yield}</p>
+                <p><strong>Seeds Used:</strong> {plan.seedsUsed}</p>
+                <p><strong>Revenue:</strong> {plan.revenue}</p>
+                <p><strong>Cultivation:</strong> {plan.cultivation}</p>
               </div>
               <div>
-                <button onClick={() => handleEdit(index)} style={styles.editButton}><FaEdit /> Edit</button>
-                <button onClick={() => handleDelete(index)} style={styles.deleteButton}><FaTrash /> Delete</button>
+                <button onClick={() => handleEdit(plan)} style={styles.editButton}>
+                  <FaEdit /> Edit
+                </button>
+                <button onClick={() => handleDelete(plan.id)} style={styles.deleteButton}>
+                  <FaTrash /> Delete
+                </button>
               </div>
             </div>
           ))}
@@ -158,83 +255,77 @@ const CropPlanning = () => {
   );
 };
 
+// Styles for the component
 const styles = {
   container: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    fontFamily: 'Arial, sans-serif',
-    backgroundColor: '#f7f7f7',
-    minHeight: '100vh',
     padding: '20px',
+    backgroundColor: '#f4f4f4',
+    minHeight: '100vh',
   },
   header: {
     fontSize: '24px',
-    color: '#4CAF50',
     marginBottom: '20px',
   },
   formContainer: {
     display: 'flex',
-    justifyContent: 'space-between',
     width: '100%',
     maxWidth: '1200px',
   },
   form: {
-    flex: '1',
-    padding: '20px',
-    backgroundColor: '#fff',
-    borderRadius: '10px',
-    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+    display: 'flex',
+    flexDirection: 'column',
+    width: '40%',
   },
   input: {
-    width: '100%',
+    marginBottom: '10px',
     padding: '10px',
-    margin: '10px 0',
-    borderRadius: '4px',
+    fontSize: '16px',
+    borderRadius: '5px',
     border: '1px solid #ccc',
   },
   addButton: {
     backgroundColor: '#28a745',
     color: '#fff',
     padding: '10px 20px',
+    fontSize: '16px',
+    borderRadius: '5px',
     border: 'none',
-    borderRadius: '4px',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '5px',
   },
   planList: {
     flex: '1',
     marginLeft: '20px',
-    padding: '20px',
-    backgroundColor: '#fff',
-    borderRadius: '10px',
-    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
   },
   planItem: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '10px',
-    borderBottom: '1px solid #ccc',
+    backgroundColor: '#fff',
+    marginBottom: '10px',
+    borderRadius: '5px',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
   },
   editButton: {
     backgroundColor: '#ffc107',
+    border: 'none',
     color: '#fff',
     padding: '5px 10px',
-    border: 'none',
-    borderRadius: '4px',
+    borderRadius: '3px',
     cursor: 'pointer',
-    marginRight: '10px',
   },
   deleteButton: {
     backgroundColor: '#dc3545',
+    border: 'none',
     color: '#fff',
     padding: '5px 10px',
-    border: 'none',
-    borderRadius: '4px',
+    borderRadius: '3px',
     cursor: 'pointer',
   },
 };
