@@ -8,14 +8,35 @@ const Login = () => {
   const [showAlert, setShowAlert] = useState(false); // State for showing alert
   const navigate = useNavigate(); // Use for redirecting
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Mock login validation
-    if (userID && password) {
-      // After successful login, navigate to home page
-      navigate('/home');
-    } else {
-      setShowAlert(true); // Show alert if credentials are invalid
+
+    // Create the login payload (adjusted for your backend)
+    const loginData = {
+      username: userID,   // Your backend uses 'username'
+      password: password, // Your backend uses 'password'
+    };
+
+    try {
+      // Make the POST request to the login API
+      const response = await fetch('http://localhost:8081/auth/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(loginData),
+      });
+
+      if (response.ok) {
+        // If the login is successful, navigate to the home page
+        navigate('/home');
+      } else {
+        // If login fails, show alert
+        setShowAlert(true);
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+      setShowAlert(true); // Show alert if there's an error
     }
   };
 

@@ -16,7 +16,7 @@ const Register = () => {
   const [alertMessage, setAlertMessage] = useState('');
   const navigate = useNavigate(); // Use for redirecting
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     
     // Check if all required fields are filled
@@ -41,12 +41,42 @@ const Register = () => {
       return;
     }
 
-    // Handle registration logic here
-    setAlertMessage('Registered successfully!');
-    setShowAlert(true);
-    setTimeout(() => {
-      navigate('/home'); // After successful registration, navigate to the home page
-    }, 2000);
+    // Create the registration data payload
+    const registrationData = {
+      username: userName,
+      password: password,
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      role: role,
+    };
+
+    try {
+      // Make the POST request to the register API
+      const response = await fetch('http://localhost:8081/auth/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registrationData),
+      });
+
+      if (response.ok) {
+        setAlertMessage('Registered successfully!');
+        setShowAlert(true);
+        setTimeout(() => {
+          navigate('/login'); // After successful registration, navigate to the home page
+        }, 2000);
+      } else {
+        const errorData = await response.json();
+        setAlertMessage(errorData.message || 'Registration failed');
+        setShowAlert(true);
+      }
+    } catch (error) {
+      console.error('Registration failed:', error);
+      setAlertMessage('An error occurred during registration');
+      setShowAlert(true);
+    }
   };
 
   const closeAlert = () => {
@@ -97,8 +127,8 @@ const Register = () => {
           required
         >
           <option value="">Select Role</option>
-          <option value="Admin">Admin</option>
-          <option value="User">User</option>
+          <option value="admin">Admin</option>
+          <option value="user">User</option>
         </select>
         <div style={styles.passwordContainer}>
           <input
