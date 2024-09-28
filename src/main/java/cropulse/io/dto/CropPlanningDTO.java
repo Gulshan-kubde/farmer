@@ -10,7 +10,7 @@ public class CropPlanningDTO {
     private String plot;
     private String cropType;
     private Date sowingDate;
-    private String yield;
+    private String cropYield;
     private String seedsUsed;
     private String revenue;
     private String cultivation;

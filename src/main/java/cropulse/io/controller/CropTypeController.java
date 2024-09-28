@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cropulse.io.dto.CropTypeDTO;
 import cropulse.io.entity.CropType;
-import cropulse.io.serviceImpl.CropTypeServiceImpl;
+import cropulse.io.serviceimpl.CropTypeServiceImpl;
 
 @RestController
 @RequestMapping("/api/cropTypes")

@@ -1,4 +1,4 @@
-package cropulse.io.serviceImpl;
+package cropulse.io.serviceimpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +25,8 @@ public class RoleServiceImpl implements RoleService {
     @Autowired
     private ModelMapper modelMapper;
 
+    private static final String ROLE_WITH_ID = "Role with ID ";
+    
     @Override
     public String addRole(RoleDTO roleDTO) {
         logger.info("Entering method: addRole with data: {}", roleDTO);
@@ -67,8 +69,8 @@ public class RoleServiceImpl implements RoleService {
         Optional<Role> existingRole = roleRepository.findById(roleId);
 
         if (!existingRole.isPresent()) {
-            logger.error("Role with ID {} does not exist", roleId);
-            throw new IllegalArgumentException("Role with ID " + roleId + " does not exist.");
+            logger.error("{} {} does not exist",ROLE_WITH_ID, roleId);
+            throw new IllegalArgumentException(ROLE_WITH_ID+ roleId + " does not exist.");
         }
 
         validateRole(roleDTO);
@@ -87,13 +89,13 @@ public class RoleServiceImpl implements RoleService {
         Optional<Role> existingRole = roleRepository.findById(roleId);
 
         if (!existingRole.isPresent()) {
-            logger.error("Role with ID {} does not exist", roleId);
-            throw new IllegalArgumentException("Role with ID " + roleId + " does not exist.");
+            logger.error("{} {} does not exist",ROLE_WITH_ID, roleId);
+            throw new IllegalArgumentException(ROLE_WITH_ID + roleId + " does not exist.");
         }
 
         roleRepository.deleteById(roleId);
-        logger.info("Exiting method: deleteRole. Role with ID {} deleted successfully", roleId);
-        return "Role with ID " + roleId + " deleted successfully.";
+        logger.info("Exiting method: deleteRole. {} {} deleted successfully",ROLE_WITH_ID, roleId);
+        return ROLE_WITH_ID + roleId + " deleted successfully.";
     }
 
     private void validateRole(RoleDTO roleDTO) {

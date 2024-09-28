@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cropulse.io.dto.CultivationDTO;
 import cropulse.io.entity.Cultivation;
-import cropulse.io.serviceImpl.CultivationServiceImpl;
+import cropulse.io.serviceimpl.CultivationServiceImpl;
 
 @RestController
 @RequestMapping("/api/cultivations")

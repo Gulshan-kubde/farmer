@@ -1,4 +1,4 @@
-package cropulse.io.serviceImpl;
+package cropulse.io.serviceimpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +24,7 @@ public class FarmLandServiceImpl implements FarmLandService {
     
     @Autowired
     private ModelMapper modelMapper;
-
+    private static final String FARMLAND_WITH_ID = "FarmLand with Farmer ID ";
     @Override
     public String addFarmLand(FarmLandDTO farmLandDTO) {
         logger.info("Entering method: addFarmLand with data: {}", farmLandDTO);
@@ -62,13 +62,13 @@ public class FarmLandServiceImpl implements FarmLandService {
 
     @Override
     public String updateFarmLand(String farmerId, FarmLandDTO farmLandDTO) {
-        logger.info("Entering method: updateFarmLand with Farmer ID: {} and data: {}", farmerId, farmLandDTO);
+        logger.info("Entering method: update {}: {} and data: {}",FARMLAND_WITH_ID, farmerId, farmLandDTO);
 
         Optional<FarmLand> existingFarmLand = farmLandRepository.findById(farmerId);
 
         if (!existingFarmLand.isPresent()) {
-            logger.error("FarmLand with Farmer ID {} does not exist", farmerId);
-            throw new IllegalArgumentException("FarmLand with Farmer ID " + farmerId + " does not exist.");
+            logger.error("{} {} does not exist",FARMLAND_WITH_ID, farmerId);
+            throw new IllegalArgumentException(FARMLAND_WITH_ID + farmerId + " does not exist.");
         }
 
         validateFarmLand(farmLandDTO);
@@ -82,18 +82,18 @@ public class FarmLandServiceImpl implements FarmLandService {
 
     @Override
     public String deleteFarmLand(String farmerId) {
-        logger.info("Entering method: deleteFarmLand with Farmer ID: {}", farmerId);
+        logger.info("Entering method: delete {}: {}",FARMLAND_WITH_ID, farmerId);
 
         Optional<FarmLand> existingFarmLand = farmLandRepository.findById(farmerId);
 
         if (!existingFarmLand.isPresent()) {
-            logger.error("FarmLand with Farmer ID {} does not exist", farmerId);
-            throw new IllegalArgumentException("FarmLand with Farmer ID " + farmerId + " does not exist.");
+            logger.error("{} {} does not exist",FARMLAND_WITH_ID, farmerId);
+            throw new IllegalArgumentException(FARMLAND_WITH_ID + farmerId + " does not exist.");
         }
 
         farmLandRepository.deleteById(farmerId);
-        logger.info("Exiting method: deleteFarmLand. FarmLand with Farmer ID {} deleted successfully", farmerId);
-        return "FarmLand with Farmer ID " + farmerId + " deleted successfully";
+        logger.info("Exiting method: deleteFarmLand. {} {} deleted successfully",FARMLAND_WITH_ID, farmerId);
+        return FARMLAND_WITH_ID + farmerId + " deleted successfully";
     }
 
     private void validateFarmLand(FarmLandDTO farmLand) {

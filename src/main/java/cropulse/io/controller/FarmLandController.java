@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,8 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cropulse.io.dto.FarmLandDTO;
 import cropulse.io.entity.FarmLand;
-import cropulse.io.serviceImpl.FarmLandServiceImpl;
+import cropulse.io.serviceimpl.FarmLandServiceImpl;
 
+
+
+@CrossOrigin(origins="http://localhost:3000")
 @RestController
 @RequestMapping("/api/farmlands")
 public class FarmLandController {
@@ -29,6 +33,7 @@ public class FarmLandController {
     @PostMapping
     public ResponseEntity<String> createFarmLand(@RequestBody FarmLandDTO farmLand) {
        try {
+    	   
         return new ResponseEntity<>(farmLandService.addFarmLand(farmLand), HttpStatus.CREATED);
        }catch(Exception e) {
     	   return new ResponseEntity<>( HttpStatus.INTERNAL_SERVER_ERROR);  
@@ -38,6 +43,7 @@ public class FarmLandController {
     
     @GetMapping
     public ResponseEntity<List<FarmLand>> getAllFarmLands() {
+    	
         List<FarmLand> farmlands = farmLandService.getAllFarmLands();
         return new ResponseEntity<>(farmlands, HttpStatus.OK);
     }

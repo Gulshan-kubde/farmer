@@ -1,6 +1,5 @@
 package cropulse.io.exception;  // Corrected package name declaration
 
-import org.jboss.resteasy.spi.ApplicationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

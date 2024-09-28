@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cropulse.io.dto.RoleDTO;
 import cropulse.io.entity.Role;
-import cropulse.io.serviceImpl.RoleServiceImpl;
+import cropulse.io.serviceimpl.RoleServiceImpl;
 
 @RestController
 @RequestMapping("/api/roles")

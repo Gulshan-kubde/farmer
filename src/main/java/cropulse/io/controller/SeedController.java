@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cropulse.io.dto.SeedDTO;
 import cropulse.io.entity.Seed;
-import cropulse.io.serviceImpl.SeedServiceImpl;
+import cropulse.io.serviceimpl.SeedServiceImpl;
 
 @RestController
 @RequestMapping("/api/seeds")

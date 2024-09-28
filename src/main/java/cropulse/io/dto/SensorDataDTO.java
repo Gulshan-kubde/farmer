@@ -3,10 +3,7 @@ package cropulse.io.dto;
 import lombok.Data;
 
 @Data
-public class CropTypeDTO {
-
-    private String cropTypeId;
+public class SensorDataDTO {
+	private String sensorName;
     private String cropName;
-
-  
 }

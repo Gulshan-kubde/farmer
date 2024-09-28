@@ -1,4 +1,4 @@
-package cropulse.io.serviceImpl;
+package cropulse.io.serviceimpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +21,7 @@ public class CropPlanningServiceImpl implements CropPlanningService {
     private CropPlanningRepository cropPlanningRepository;
     
     private static final Logger logger = LoggerFactory.getLogger(CropPlanningServiceImpl.class);
-
+    private static final String CROPPLANNING_WITH_ID = "CropPlanning with ID ";
     @Autowired
     private ModelMapper modelMapper;
     
@@ -67,8 +67,8 @@ public class CropPlanningServiceImpl implements CropPlanningService {
         Optional<CropPlanning> existingCropPlanning = cropPlanningRepository.findById(id);
 
         if (!existingCropPlanning.isPresent()) {
-            logger.error("CropPlanning with ID {} does not exist", id);
-            throw new IllegalArgumentException("CropPlanning with ID " + id + " does not exist.");
+            logger.error("{} {} does not exist", CROPPLANNING_WITH_ID,id);
+            throw new IllegalArgumentException(CROPPLANNING_WITH_ID + id + " does not exist.");
         }
 
         validateCropPlanning(cropPlanningDTO);
@@ -88,13 +88,13 @@ public class CropPlanningServiceImpl implements CropPlanningService {
         Optional<CropPlanning> existingCropPlanning = cropPlanningRepository.findById(id);
 
         if (!existingCropPlanning.isPresent()) {
-            logger.error("CropPlanning with ID {} does not exist", id);
-            throw new IllegalArgumentException("CropPlanning with ID " + id + " does not exist.");
+            logger.error("{} {} does not exist",CROPPLANNING_WITH_ID,id);
+            throw new IllegalArgumentException(CROPPLANNING_WITH_ID + id + " does not exist.");
         }
 
         cropPlanningRepository.deleteById(id);
-        logger.info("Exiting method: deleteCropPlanning. CropPlanning with ID {} deleted successfully", id);
-        return "CropPlanning with ID " + id + " deleted successfully.";
+        logger.info("Exiting method: deleteCropPlanning. {} {} deleted successfully",CROPPLANNING_WITH_ID, id);
+        return CROPPLANNING_WITH_ID + id + " deleted successfully.";
     }
 
     private void validateCropPlanning(CropPlanningDTO cropPlanning) {
@@ -104,7 +104,7 @@ public class CropPlanningServiceImpl implements CropPlanningService {
             throw new IllegalArgumentException("Plot cannot be null or empty.");
         }
         
-        // Other validations are the same
+       
         logger.debug("Validation completed successfully for CropPlanning: {}", cropPlanning);
     }
 }

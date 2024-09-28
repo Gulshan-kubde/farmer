@@ -1,4 +1,4 @@
-package cropulse.io.serviceImpl;
+package cropulse.io.serviceimpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +24,7 @@ public class PlotServiceImpl implements PlotService {
 
     @Autowired
     private ModelMapper modelMapper;
-    
+    private static final String PLOT_WITH_ID = "Plot with ID ";
     @Override
     public String addPlot(PlotDTO plotDTO) {
         logger.info("Entering method: addPlot with data: {}", plotDTO);
@@ -67,8 +67,8 @@ public class PlotServiceImpl implements PlotService {
         Optional<Plot> existingPlot = plotRepository.findById(plotId);
 
         if (!existingPlot.isPresent()) {
-            logger.error("Plot with ID {} does not exist", plotId);
-            throw new IllegalArgumentException("Plot with ID " + plotId + " does not exist.");
+            logger.error("{} {} does not exist",PLOT_WITH_ID, plotId);
+            throw new IllegalArgumentException(PLOT_WITH_ID + plotId + " does not exist.");
         }
 
         validatePlot(plotDTO);
@@ -87,13 +87,13 @@ public class PlotServiceImpl implements PlotService {
         Optional<Plot> existingPlot = plotRepository.findById(plotId);
 
         if (!existingPlot.isPresent()) {
-            logger.error("Plot with ID {} does not exist", plotId);
-            throw new IllegalArgumentException("Plot with ID " + plotId + " does not exist.");
+            logger.error("{} {} does not exist",PLOT_WITH_ID, plotId);
+            throw new IllegalArgumentException(PLOT_WITH_ID + plotId + " does not exist.");
         }
 
         plotRepository.deleteById(plotId);
-        logger.info("Exiting method: deletePlot. Plot with ID {} deleted successfully", plotId);
-        return "Plot with ID " + plotId + " deleted successfully.";
+        logger.info("Exiting method: deletePlot. {} {} deleted successfully",PLOT_WITH_ID, plotId);
+        return PLOT_WITH_ID+ plotId + " deleted successfully.";
     }
 
     private void validatePlot(PlotDTO plot) {

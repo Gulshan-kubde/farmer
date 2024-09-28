@@ -1,4 +1,4 @@
-package cropulse.io.serviceImpl;
+package cropulse.io.serviceimpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +25,8 @@ public class CropTypeServiceImpl implements CropTypeService {
     @Autowired
     private ModelMapper modelMapper;
 
+    private static final String CROPTYPE_WITH_ID = "CropType with ID ";
+    
     @Override
     public String addCropType(CropTypeDTO cropTypeDTO) {
         logger.info("Entering method: addCropType with data: {}", cropTypeDTO);
@@ -61,13 +63,13 @@ public class CropTypeServiceImpl implements CropTypeService {
 
     @Override
     public String updateCropType(String cropTypeId, CropTypeDTO cropTypeDTO) {
-        logger.info("Entering method: updateCropType with ID: {} and data: {}", cropTypeId, cropTypeDTO);
+        logger.info("Entering method: update (): {} and data: {}", CROPTYPE_WITH_ID, cropTypeId, cropTypeDTO);
         
         Optional<CropType> existingCropType = cropTypeRepository.findById(cropTypeId);
 
         if (!existingCropType.isPresent()) {
-            logger.error("CropType with ID {} does not exist", cropTypeId);
-            throw new IllegalArgumentException("CropType with ID " + cropTypeId + " does not exist.");
+            logger.error("{} {} does not exist",CROPTYPE_WITH_ID, cropTypeId);
+            throw new IllegalArgumentException(CROPTYPE_WITH_ID + cropTypeId + " does not exist.");
         }
 
         validateCropType(cropTypeDTO);
@@ -82,18 +84,18 @@ public class CropTypeServiceImpl implements CropTypeService {
 
     @Override
     public String deleteCropType(String cropTypeId) {
-        logger.info("Entering method: deleteCropType with ID: {}", cropTypeId);
+        logger.info("Entering method: delete {} : {}",CROPTYPE_WITH_ID, cropTypeId);
         
         Optional<CropType> existingCropType = cropTypeRepository.findById(cropTypeId);
 
         if (!existingCropType.isPresent()) {
-            logger.error("CropType with ID {} does not exist", cropTypeId);
-            throw new IllegalArgumentException("CropType with ID " + cropTypeId + " does not exist.");
+            logger.error("{} {} does not exist",CROPTYPE_WITH_ID, cropTypeId);
+            throw new IllegalArgumentException(CROPTYPE_WITH_ID + cropTypeId + " does not exist.");
         }
 
         cropTypeRepository.deleteById(cropTypeId);
-        logger.info("Exiting method: deleteCropType. CropType with ID {} deleted successfully", cropTypeId);
-        return "CropType with ID " + cropTypeId + " deleted successfully.";
+        logger.info("Exiting method: deleteCropType. {} {} deleted successfully",CROPTYPE_WITH_ID, cropTypeId);
+        return CROPTYPE_WITH_ID + cropTypeId + " deleted successfully.";
     }
 
     private void validateCropType(CropTypeDTO cropType) {

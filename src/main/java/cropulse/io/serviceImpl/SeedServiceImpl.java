@@ -1,4 +1,4 @@
-package cropulse.io.serviceImpl;
+package cropulse.io.serviceimpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +25,7 @@ public class SeedServiceImpl implements SeedService {
     @Autowired
     private ModelMapper modelMapper;
 
-
+    private static final String SEED_WITH_ID = "Seed with ID ";
     @Override
     public String addSeed(SeedDTO seedDTO) {
         logger.info("Entering method: addSeed with data: {}", seedDTO);
@@ -68,8 +68,8 @@ public class SeedServiceImpl implements SeedService {
         Optional<Seed> existingSeed = seedRepository.findById(seedId);
 
         if (!existingSeed.isPresent()) {
-            logger.error("Seed with ID {} does not exist", seedId);
-            throw new IllegalArgumentException("Seed with ID " + seedId + " does not exist.");
+            logger.error("{} {} does not exist",SEED_WITH_ID, seedId);
+            throw new IllegalArgumentException(SEED_WITH_ID + seedId + " does not exist.");
         }
 
         validateSeed(seedDTO);
@@ -88,13 +88,13 @@ public class SeedServiceImpl implements SeedService {
         Optional<Seed> existingSeed = seedRepository.findById(seedId);
 
         if (!existingSeed.isPresent()) {
-            logger.error("Seed with ID {} does not exist", seedId);
-            throw new IllegalArgumentException("Seed with ID " + seedId + " does not exist.");
+            logger.error("{} {} does not exist",SEED_WITH_ID, seedId);
+            throw new IllegalArgumentException(SEED_WITH_ID + seedId + " does not exist.");
         }
 
         seedRepository.deleteById(seedId);
-        logger.info("Exiting method: deleteSeed. Seed with ID {} deleted successfully", seedId);
-        return "Seed with ID " + seedId + " deleted successfully.";
+        logger.info("Exiting method: deleteSeed. {} {} deleted successfully",SEED_WITH_ID, seedId);
+        return SEED_WITH_ID + seedId + " deleted successfully.";
     }
 
     private void validateSeed(SeedDTO seedDTO) {

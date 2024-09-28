@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cropulse.io.dto.PlotDTO;
 import cropulse.io.entity.Plot;
-import cropulse.io.serviceImpl.PlotServiceImpl;
+import cropulse.io.serviceimpl.PlotServiceImpl;
 
 @RestController
 @RequestMapping("/api/plots")

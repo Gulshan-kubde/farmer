@@ -1,4 +1,4 @@
-package cropulse.io.serviceImpl;
+package cropulse.io.serviceimpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +25,8 @@ public class SensorServiceImpl implements SensorService {
     @Autowired
     private ModelMapper modelMapper;
 
-
+    private static final String SENSOR_WITH_ID = "Sensor with ID ";
+    
     @Override
     public String addSensor(SensorDTO sensorDTO) {
         logger.info("Entering method: addSensor with data: {}", sensorDTO);
@@ -68,8 +69,8 @@ public class SensorServiceImpl implements SensorService {
         Optional<Sensor> existingSensor = sensorRepository.findById(sensorId);
 
         if (!existingSensor.isPresent()) {
-            logger.error("Sensor with ID {} does not exist", sensorId);
-            throw new IllegalArgumentException("Sensor with ID " + sensorId + " does not exist.");
+            logger.error("{} {} does not exist",SENSOR_WITH_ID, sensorId);
+            throw new IllegalArgumentException(SENSOR_WITH_ID + sensorId + " does not exist.");
         }
 
         validateSensor(sensorDTO);
@@ -88,13 +89,13 @@ public class SensorServiceImpl implements SensorService {
         Optional<Sensor> existingSensor = sensorRepository.findById(sensorId);
 
         if (!existingSensor.isPresent()) {
-            logger.error("Sensor with ID {} does not exist", sensorId);
-            throw new IllegalArgumentException("Sensor with ID " + sensorId + " does not exist.");
+            logger.error(SENSOR_WITH_ID + "{} does not exist", sensorId);
+            throw new IllegalArgumentException(SENSOR_WITH_ID + sensorId + " does not exist.");
         }
 
         sensorRepository.deleteById(sensorId);
-        logger.info("Exiting method: deleteSensor. Sensor with ID {} deleted successfully", sensorId);
-        return "Sensor with ID " + sensorId + " deleted successfully.";
+        logger.info("Exiting method: deleteSensor. " + SENSOR_WITH_ID + "{} deleted successfully", sensorId);
+        return SENSOR_WITH_ID + sensorId + " deleted successfully.";
     }
 
     private void validateSensor(SensorDTO sensorDTO) {

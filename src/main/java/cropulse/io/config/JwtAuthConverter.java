@@ -2,6 +2,7 @@ package cropulse.io.config;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,7 +35,7 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
     public AbstractAuthenticationToken convert(@NonNull Jwt jwt) {
 
         Collection<GrantedAuthority> authorities = Stream.concat(
-                jwtGrantedAuthoritiesConverter.convert(jwt).stream(),
+        		 Optional.ofNullable(jwtGrantedAuthoritiesConverter.convert(jwt)).orElse(Set.of()).stream(),
                 extractResourceRoles(jwt).stream()
         ).collect(Collectors.toSet());
 
@@ -42,6 +43,8 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
                 jwt, authorities, getPrincipleClaimName(jwt)
         );
     }
+    
+    
 
     private String getPrincipleClaimName(Jwt jwt) {
 

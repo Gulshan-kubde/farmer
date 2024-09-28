@@ -1,4 +1,4 @@
-package cropulse.io.serviceImpl;
+package cropulse.io.serviceimpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +25,8 @@ public class CultivationServiceImpl implements CultivationService {
     @Autowired
     private ModelMapper modelMapper;
 
+    private static final String CULTIVATION_WITH_ID = "Cultivation with ID ";
+    
     @Override
     public String addCultivation(CultivationDTO cultivationDTO) {
         logger.info("Entering method: addCultivation with data: {}", cultivationDTO);
@@ -67,8 +69,8 @@ public class CultivationServiceImpl implements CultivationService {
         Optional<Cultivation> existingCultivation = cultivationRepository.findById(cultivationId);
 
         if (!existingCultivation.isPresent()) {
-            logger.error("Cultivation with ID {} does not exist", cultivationId);
-            throw new IllegalArgumentException("Cultivation with ID " + cultivationId + " does not exist.");
+            logger.error("{} {} does not exist",CULTIVATION_WITH_ID, cultivationId);
+            throw new IllegalArgumentException(CULTIVATION_WITH_ID + cultivationId + " does not exist.");
         }
 
         validateCultivation(cultivationDTO);
@@ -88,13 +90,13 @@ public class CultivationServiceImpl implements CultivationService {
         Optional<Cultivation> existingCultivation = cultivationRepository.findById(cultivationId);
 
         if (!existingCultivation.isPresent()) {
-            logger.error("Cultivation with ID {} does not exist", cultivationId);
-            throw new IllegalArgumentException("Cultivation with ID " + cultivationId + " does not exist.");
+            logger.error("{} {} does not exist",CULTIVATION_WITH_ID, cultivationId);
+            throw new IllegalArgumentException(CULTIVATION_WITH_ID + cultivationId + " does not exist.");
         }
 
         cultivationRepository.deleteById(cultivationId);
-        logger.info("Exiting method: deleteCultivation. Cultivation with ID {} deleted successfully", cultivationId);
-        return "Cultivation with ID " + cultivationId + " deleted successfully.";
+        logger.info("Exiting method: deleteCultivation. {} {} deleted successfully",CULTIVATION_WITH_ID, cultivationId);
+        return CULTIVATION_WITH_ID + cultivationId + " deleted successfully.";
     }
 
     private void validateCultivation(CultivationDTO cultivation) {
