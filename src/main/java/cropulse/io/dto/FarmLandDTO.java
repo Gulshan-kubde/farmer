@@ -9,6 +9,7 @@ public class FarmLandDTO {
     private int approxAcre;
     private int cents;
     private String name;
+    private double area;
 
    
 }

@@ -7,7 +7,7 @@ import lombok.Data;
 public class SensorDTO {
 	@Id
 	private String sensorId;
-	private String cropType;
+	private String sensorName;
 
 	
 }

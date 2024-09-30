@@ -17,7 +17,7 @@ public class FarmLand {
     private int approxAcre;
     private int cents;
     private String name;
-    
+    private double area;
     
 	
 

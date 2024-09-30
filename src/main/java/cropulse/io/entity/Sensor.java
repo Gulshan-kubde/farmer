@@ -12,7 +12,7 @@ public class Sensor {
   
     @Id
     private String sensorId;     
-    private String cropType;
+    private String sensorName;
     
 	 
     

@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import cropulse.io.dto.LoginDTO;
+import lombok.Data;
 
 @Component
+@Data
 public class KeycloakUtitlity {
 	
 	
@@ -48,5 +50,8 @@ public class KeycloakUtitlity {
                 .password(loginDTO.getPassword())
                 .build();
     }
-
+    
+   
+    
+   
 }

@@ -31,6 +31,14 @@ public class FarmLandServiceImpl implements FarmLandService {
 
         validateFarmLand(farmLandDTO);
         FarmLand farmLand = modelMapper.map(farmLandDTO, FarmLand.class);
+        
+        double acreToSquareFeet = 43560; // 1 acre = 43,560 square feet
+        double centToSquareFeet = 435.6; // 1 cent = 435.6 square feet
+        int cents = farmLand.getCents();
+        int acres =farmLand.getApproxAcre();
+        
+        double totalAreaInSquareFeet = (acres * acreToSquareFeet) + (cents * centToSquareFeet);
+        farmLand.setArea(totalAreaInSquareFeet);
         farmLandRepository.save(farmLand);
 
         logger.info("Exiting method: addFarmLand. FarmLand created successfully.");
@@ -74,6 +82,13 @@ public class FarmLandServiceImpl implements FarmLandService {
         validateFarmLand(farmLandDTO);
         FarmLand farmLand = modelMapper.map(farmLandDTO, FarmLand.class);
         farmLand.setFarmerId(farmerId);
+        double acreToSquareFeet = 43560; // 1 acre = 43,560 square feet
+        double centToSquareFeet = 435.6; // 1 cent = 435.6 square feet
+        int cents = farmLand.getCents();
+        int acres =farmLand.getApproxAcre();
+        
+        double totalAreaInSquareFeet = (acres * acreToSquareFeet) + (cents * centToSquareFeet);
+        farmLand.setArea(totalAreaInSquareFeet);
         farmLandRepository.save(farmLand);
 
         logger.info("Exiting method: updateFarmLand. FarmLand updated successfully with Farmer ID: {}", farmerId);

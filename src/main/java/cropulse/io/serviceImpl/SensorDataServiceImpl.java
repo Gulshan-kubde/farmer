@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import cropulse.io.dto.SensorDTO;
+import cropulse.io.dto.SensorDataDTO;
 import cropulse.io.entity.SensorData;
 import cropulse.io.repository.SensorDataRepository;
 import cropulse.io.service.SensorDataService;
@@ -27,7 +27,7 @@ public class SensorDataServiceImpl implements SensorDataService {
     private static final String SENSOR_WITH_ID = "Sensor with ID ";
     
     @Override
-    public String addSensor(SensorDTO sensorDTO) {
+    public String addSensor(SensorDataDTO sensorDTO) {
         logger.info("Entering method: addSensor with parameters: {}", sensorDTO);
         SensorData sensorData = modelMapper.map(sensorDTO, SensorData.class);
         sensorDataRepository.save(sensorData);
@@ -38,21 +38,34 @@ public class SensorDataServiceImpl implements SensorDataService {
     @Override
     public List<SensorData> getAllSensors() {
         logger.info("Entering method: getAllSensors");
+
+     
         List<SensorData> sensors = sensorDataRepository.findAll();
+
         logger.info("Exiting method: getAllSensors with result size: {}", sensors.size());
+        
         return sensors;
     }
 
     @Override
     public Optional<SensorData> getSensorById(String sensorDataId) {
         logger.info("Entering method: getSensorById with ID: {}", sensorDataId);
+
         Optional<SensorData> sensorData = sensorDataRepository.findById(sensorDataId);
-        logger.info("Exiting method: getSensorById");
-        return sensorData;
+        
+        if (sensorData.isPresent()) {
+          
+            logger.info("Exiting method: getSensorById with found data");
+            return Optional.of(sensorData.get());
+        } else {
+            logger.warn("No SensorData found with ID: {}", sensorDataId);
+            return Optional.empty();
+        }
     }
 
+
     @Override
-    public String updateSensor(String sensorDataId, SensorDTO sensorDTO) {
+    public String updateSensor(String sensorDataId, SensorDataDTO sensorDTO) {
         logger.info("Entering method: updateSensor with ID: {} and data: {}", sensorDataId, sensorDTO);
         
         Optional<SensorData> existingSensor = sensorDataRepository.findById(sensorDataId);

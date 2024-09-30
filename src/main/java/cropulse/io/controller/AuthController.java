@@ -1,18 +1,7 @@
 package cropulse.io.controller;
 
-import java.util.Collections;
-
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Response;
-
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.AccessTokenResponse;
-import org.keycloak.representations.idm.CredentialRepresentation;
-import org.keycloak.representations.idm.RoleRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,151 +16,78 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import cropulse.io.dto.LoginDTO;
+import cropulse.io.dto.RefreshTokenDto;
 import cropulse.io.dto.UserDTO;
-import cropulse.io.utility.KeycloakUtitlity;
+import cropulse.io.service.UserAuthService;
 
-@CrossOrigin(origins="*")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/auth/api")
 public class AuthController {
 
-    @Value("${keycloak.realm}")
-    private String realm;
+	@Autowired
+	private UserAuthService userAuthService;
 
-    @Autowired
-    private KeycloakUtitlity keycloakUtitlity;
+	@PostMapping("/register")
+	public ResponseEntity<String> registerUser(@RequestBody UserDTO userDTO) {
+		try {
+			return new ResponseEntity<>(userAuthService.registerUser(userDTO), HttpStatus.CREATED);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 
-    @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody UserDTO userDTO) {
-        Keycloak keycloak = keycloakUtitlity.createKeycloakInstance();
-        
-        try {
-            UserRepresentation user = new UserRepresentation();
-            user.setUsername(userDTO.getUsername());
-            user.setEmail(userDTO.getEmail());
-            user.setFirstName(userDTO.getFirstName());
-            user.setLastName(userDTO.getLastName());
-            user.setEnabled(true);
+	@PostMapping("/login")
+	public ResponseEntity<AccessTokenResponse> login(@RequestBody LoginDTO loginDTO) {
+		try {
+			AccessTokenResponse tokenResponse = userAuthService.login(loginDTO);
+			return ResponseEntity.ok(tokenResponse);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 
-            CredentialRepresentation credential = new CredentialRepresentation();
-            credential.setTemporary(false);
-            credential.setType(CredentialRepresentation.PASSWORD);
-            credential.setValue(userDTO.getPassword());
-            user.setCredentials(Collections.singletonList(credential));
+	@PostMapping("/logout")
+	public ResponseEntity<?> logoutUser() {
+		try {
+			return ResponseEntity.ok(userAuthService.logout());
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 
-            Response response = keycloak.realm(realm).users().create(user);
+	}
+	@PostMapping("/refreshAccessToken")
+	public ResponseEntity<?> refreshAccessToken(@RequestBody RefreshTokenDto refreshToken){
+		return ResponseEntity.ok(userAuthService.refreshAccessToken(refreshToken.getToken()));
+	}
 
-            if (response.getStatus() == 201) {
-                String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
+	@PutMapping("/update/{userId}")
+	public ResponseEntity<String> updateUser(@PathVariable String userId, @RequestBody UserDTO updateUserDTO) {
+		try {
+			return new ResponseEntity<>(userAuthService.updateUser(userId, updateUserDTO), HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 
-                RoleRepresentation role = keycloak.realm(realm).roles().get(userDTO.getRole()).toRepresentation();
-                keycloak.realm(realm).users().get(userId).roles().realmLevel().add(Collections.singletonList(role));
+	@DeleteMapping("/delete/{userId}")
+	public ResponseEntity<String> deleteUser(@PathVariable String userId) {
+		try {
+			return new ResponseEntity<>(userAuthService.deleteUser(userId), HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 
-                return ResponseEntity.ok("User registered successfully with role: " + userDTO.getRole());
-            } else {
-                return ResponseEntity.status(response.getStatus())
-                        .body("Failed to create user. Status: " + response.getStatus());
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error registering user: " + e.getMessage());
-        } finally {
-           
-                keycloak.close();  // Close Keycloak instance in finally block
-            
-        }
-    }
+	@PreAuthorize("hasRole('CLIENT_ADMIN')")
+	@GetMapping("/gm")
+	public String gm() {
+		return "good morning";
+	}
 
-    @PostMapping("/login")
-    public ResponseEntity<AccessTokenResponse> login(@RequestBody LoginDTO loginDTO) {
-        Keycloak keycloakInstance = keycloakUtitlity.getKeycloakInstance(loginDTO);
-        
-        try {
-            AccessTokenResponse tokenResponse = keycloakInstance.tokenManager().grantToken();
-            return ResponseEntity.ok(tokenResponse);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);  // Adjust response body as per your requirements
-        } finally {
-           
-                keycloakInstance.close();  // Close Keycloak instance in finally block
-            
-        }
-    }
-
-
-    @PutMapping("/update/{userId}")
-    public ResponseEntity<String> updateUser(@PathVariable String userId, @RequestBody UserDTO updateUserDTO) {
-        Keycloak keycloak = keycloakUtitlity.createKeycloakInstance();
-
-        try {
-            UserResource userResource = keycloak.realm(realm).users().get(userId);
-            UserRepresentation userRepresentation = userResource.toRepresentation();
-
-            if (updateUserDTO.getFirstName() != null) {
-                userRepresentation.setFirstName(updateUserDTO.getFirstName());
-            }
-            if (updateUserDTO.getLastName() != null) {
-                userRepresentation.setLastName(updateUserDTO.getLastName());
-            }
-            if (updateUserDTO.getEmail() != null) {
-                userRepresentation.setEmail(updateUserDTO.getEmail());
-            }
-
-            if (updateUserDTO.getPassword() != null && !updateUserDTO.getPassword().isEmpty()) {
-                CredentialRepresentation credential = new CredentialRepresentation();
-                credential.setTemporary(false);
-                credential.setType(CredentialRepresentation.PASSWORD);
-                credential.setValue(updateUserDTO.getPassword());
-
-                userResource.resetPassword(credential);
-            }
-
-            userResource.update(userRepresentation);
-
-            return ResponseEntity.ok("User updated successfully");
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error updating user: " + e.getMessage());
-        } finally {
-            
-                keycloak.close(); 
-            
-        }
-    }
-
-    @DeleteMapping("/delete/{userId}")
-    public ResponseEntity<String> deleteUser(@PathVariable String userId) {
-        Keycloak keycloak = keycloakUtitlity.createKeycloakInstance();
-
-        try {
-            UserResource userResource = keycloak.realm(realm).users().get(userId);
-            userResource.remove();
-
-            return ResponseEntity.ok("User deleted successfully.");
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error deleting user: " + e.getMessage());
-        } finally {
-            
-                keycloak.close();  
-            
-        }
-    }
-
-    @PreAuthorize("hasRole('CLIENT_ADMIN')")
-    @GetMapping("/gm")
-    public String gm() {
-        return "good morning";
-    }
-
-    @GetMapping("/gn")
-    @PreAuthorize("hasRole('CLIENT_USER')")
-    public String gn() {
-        return "good night";
-    }
+	@GetMapping("/gn")
+	@PreAuthorize("hasRole('CLIENT_USER')")
+	public String gn() {
+		return "good night";
+	}
 }

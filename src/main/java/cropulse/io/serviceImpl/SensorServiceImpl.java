@@ -101,8 +101,8 @@ public class SensorServiceImpl implements SensorService {
     private void validateSensor(SensorDTO sensorDTO) {
         logger.debug("Validating Sensor: {}", sensorDTO);
 
-        String cropType = sensorDTO.getCropType();
-        if (cropType == null || cropType.trim().isEmpty()) {
+        String sensorName = sensorDTO.getSensorName();
+        if (sensorName == null || sensorName.trim().isEmpty()) {
             logger.error("Validation error: CropType cannot be null or empty.");
             throw new IllegalArgumentException("CropType cannot be null or empty.");
         }
